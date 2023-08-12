@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.himedia.mybatis.model.mapper.MusicMapper">
+    
+    <resultMap id="musicResultMap" type="com.himedia.mybatis.model.dto.MusicDTO">
+        <id property="no" column="MUSIC_NO"/>
+        <result property="name" column="MUSIC_NAME"/>
+        <result property="genre" column="MUSIC_GENRE"/>
+        <result property="singer" column="SINGER_NAME"/>
+        <result property="themeCode" column="THEME_CODE"/>
+    </resultMap>
+
+    <select id="selectAllMusic" resultMap="musicResultMap">
+        SELECT
+               MUSIC_NO
+             , MUSIC_NAME
+             , MUSIC_GENRE
+             , SINGER_NAME
+             , THEME_CODE
+          FROM TBL_MUSIC
+         ORDER BY MUSIC_NO
+    </select>
+
+    <select id="selectMusicByGenre" parameterType="string" resultMap="musicResultMap">
+        SELECT
+               MUSIC_NO
+             , MUSIC_NAME
+             , MUSIC_GENRE
+             , SINGER_NAME
+             , THEME_CODE
+          FROM TBL_MUSIC
+         WHERE MUSIC_GENRE = #{ genre }
+    </select>
+
+    <select id="searchMusic" parameterType="com.himedia.mybatis.common.SearchCriteria" resultMap="musicResultMap">
+        SELECT
+               MUSIC_NO
+             , MUSIC_NAME
+             , MUSIC_GENRE
+             , SINGER_NAME
+             , THEME_CODE
+          FROM TBL_MUSIC
+        <if test="condition == 'title'">
+            <where>
+            MUSIC_NAME LIKE '%' || #{ value } || '%'
+            </where>
+        </if>
+        <if test="condition == 'singer'">
+            <where>
+            AND SINGER_NAME LIKE '%' || #{ value } || '%'
+            </where>
+        </if>
+        ORDER BY MUSIC_NO
+    </select>
+
+
+    <select id="selectMusicByMood" parameterType="string" resultMap="musicResultMap">
+        SELECT
+               MUSIC_NO
+             , MUSIC_NAME
+             , MUSIC_GENRE
+             , SINGER_NAME
+             , THEME_CODE
+          FROM TBL_MUSIC
+          JOIN TBL_MUSIC_MOOD USING (THEME_CODE)
+         WHERE THEME_CATEGORY_NAME = #{ mood }
+    </select>
+
+
+    <insert id="insertMusic" parameterType="com.himedia.mybatis.model.dto.MusicDTO">
+        INSERT
+          INTO TBL_MUSIC
+        (
+          MUSIC_NO
+        , MUSIC_NAME
+        , MUSIC_GENRE
+        , SINGER_NAME
+        , THEME_CODE
+        )
+        VALUES
+        (
+          SEQ_MUSIC_NO.NEXTVAL
+        , #{ name }
+        , #{ genre }
+        , #{ singer }
+        , #{ themeCode }
+        )
+    </insert>
+
+    <update id="modifyMusic" parameterType="com.himedia.mybatis.model.dto.MusicDTO">
+        UPDATE
+               TBL_MUSIC
+           SET MUSIC_NAME = #{ name }
+             , MUSIC_GENRE = #{ genre }
+             , SINGER_NAME = #{ singer }
+             , THEME_CODE = #{ themeCode}
+         WHERE MUSIC_NO = #{ no }
+    </update>
+
+    <delete id="deleteMusic" parameterType="_int">
+        DELETE
+               TBL_MUSIC
+         WHERE MUSIC_NO = #{ no }
+    </delete>
+
+
+
+</mapper>
